@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Жанр: {{ genre.name }}</title>
+</head>
+<body>
+    <h1>Книги в жанре: {{ genre.name }}</h1>
+    <ul>
+        {% for book in books %}
+        <li>{{ book.title }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('index') }}">Назад на главную</a>
+</body>
+</html>
