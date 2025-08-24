@@ -3,18 +3,33 @@
 <head>
     <title>Главная страница</title>
     <script>
-        async function updateIsRead(bookId, isReadCheckbox) {
-            const isRead = isReadCheckbox.checked;
-            const response = await fetch(`/update_is_read/${bookId}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ is_read: isRead })
-            });
-            const data = await response.json();
-            if (!data.success) {
-                alert('Ошибка при сохранении статуса книги');
+        async function saveBookStatus(bookId) {
+            // ПРАВИЛЬНОЕ получение чекбокса по ID
+            const checkbox = document.getElementById(`checkbox-${bookId}`);
+            const isRead = checkbox.checked;
+
+            console.log(`Saving book ${bookId}, is_read: ${isRead}`); // для отладки
+
+            try {
+                const response = await fetch(`/update_is_read/${bookId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ is_read: isRead })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('Статус книги успешно сохранен!');
+                    console.log('Saved successfully:', data);
+                } else {
+                    alert('Ошибка при сохранении статуса книги: ' + (data.error || 'Неизвестная ошибка'));
+                    console.error('Save error:', data);
+                }
+            } catch (error) {
+                alert('Ошибка сети: ' + error.message);
+                console.error('Network error:', error);
             }
         }
     </script>
@@ -25,7 +40,9 @@
         {% for book in books %}
         <li>
             {{ book.title }} - Жанр: <a href="{{ url_for('genre_view', genre_id=book.genre_id) }}">{{ book.genre.name }}</a>
-            <input type="checkbox" onchange="updateIsRead({{ book.id }}, this)" {% if book.is_read %}checked{% endif %}>
+            <input type="checkbox" id="checkbox-{{ book.id }}" {% if book.is_read %}checked{% endif %}>
+            <button onclick="saveBookStatus({{ book.id }})">Сохранить</button>
+            (Текущий статус: {{ 'Прочитана' if book.is_read else 'Не прочитана' }})
         </li>
         {% endfor %}
     </ul>
